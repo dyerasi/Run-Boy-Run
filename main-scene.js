@@ -100,27 +100,9 @@ class Assignment_Three_Scene extends Scene_Component
         this.key_triggered_button( "Attach to planet 5", [ "5" ], () => this.attached = () => this.planet_5 );
         this.key_triggered_button( "Attach to moon",     [ "m" ], () => this.attached = () => this.moon     );
       }
-    display( graphics_state )
-      { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-        const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
-
-        //define constants
-        const box_size = 8;
-        const row_length = 6;
-        const path_length = 10;
-        const blue = Color.of( 0,0,1,1 ), yellow = Color.of( 1,1,0,1 );
-        let model_transform = Mat4.identity().times(Mat4.scale([box_size, box_size, box_size]));
-        const tr_right = 2; 
-        
-        /*
-        let camera_tr = Mat4.identity().times(Mat4.translation([36.59-45.02, 16.14-17.40, -37.49+23.59]));
-         var desired = Mat4.inverse(camera_tr);
-         desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
-         graphics_state.camera_transform = desired; 
-        */
-       // 36.59, 16.14, -37.49
-       //45.02, 17.40, -23.59
-        //draw path
+    draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
+      const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+       //draw path
         for(var i = 1; i != path_length+1; i++){
           for(var j = 1; j != row_length + 1; j++){
             this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
@@ -137,7 +119,38 @@ class Assignment_Three_Scene extends Scene_Component
           }
           model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]))
           model_transform = model_transform.times(Mat4.translation([0, 0, 2]))
-        }  // Draw the top box.
+        }  
+    }
+    display( graphics_state )
+      { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
+        const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+
+        //define constants
+        const box_size = 8;
+        const row_length = 6;
+        const path_length = 100;
+        const blue = Color.of( 0,0,1,1 ), yellow = Color.of( 1,1,0,1 );
+        let model_transform = Mat4.identity().times(Mat4.scale([box_size, box_size, box_size]));
+        const tr_right = 2; 
+        
+        //draw_path
+        this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state);
+        /*
+        let camera_tr = Mat4.identity().times(Mat4.translation([36.59-45.02, 16.14-17.40, -37.49+23.59]));
+         var desired = Mat4.inverse(camera_tr);
+         desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
+         graphics_state.camera_transform = desired; 
+        */
+       // 36.59, 16.14, -37.49
+       //45.02, 17.40, -23.59
+
+       //draw chaser
+          let chaser_transform = model_transform.times(Mat4.translation([0, 10, 0]));
+          this.shapes.sphere4.draw(graphics_state, chaser_transform, this.materials.sun);
+       //draw player
+
+
+       // Draw the top box.
       
         /*
         model_transform   = model_transform.times( Mat4.rotation( 1, Vec.of( 0,0,1 ) ) )  // Rotate another axis by a constant value.
