@@ -1,17 +1,44 @@
+window.Cube = window.classes.Cube =
+class Cube extends Shape                 // Here's a complete, working example of a Shape subclass.  It is a blueprint for a cube.
+  { constructor()
+      { super( "positions", "normals" ); // Name the values we'll define per each vertex.  They'll have positions and normals.
+
+        // First, specify the vertex positions -- just a bunch of points that exist at the corners of an imaginary cube.
+        this.positions.push( ...Vec.cast( [-1,-1,-1], [1,-1,-1], [-1,-1,1], [1,-1,1], [1,1,-1],  [-1,1,-1],  [1,1,1],  [-1,1,1],
+                                          [-1,-1,-1], [-1,-1,1], [-1,1,-1], [-1,1,1], [1,-1,1],  [1,-1,-1],  [1,1,1],  [1,1,-1],
+                                          [-1,-1,1],  [1,-1,1],  [-1,1,1],  [1,1,1], [1,-1,-1], [-1,-1,-1], [1,1,-1], [-1,1,-1] ) );
+        // Supply vectors that point away from eace face of the cube.  They should match up with the points in the above list
+        // Normal vectors are needed so the graphics engine can know if the shape is pointed at light or not, and color it accordingly.
+        this.normals.push(   ...Vec.cast( [0,-1,0], [0,-1,0], [0,-1,0], [0,-1,0], [0,1,0], [0,1,0], [0,1,0], [0,1,0], [-1,0,0], [-1,0,0],
+                                          [-1,0,0], [-1,0,0], [1,0,0],  [1,0,0],  [1,0,0], [1,0,0], [0,0,1], [0,0,1], [0,0,1],   [0,0,1],
+                                          [0,0,-1], [0,0,-1], [0,0,-1], [0,0,-1] ) );
+
+                 // Those two lists, positions and normals, fully describe the "vertices".  What's the "i"th vertex?  Simply the combined
+                 // data you get if you look up index "i" of both lists above -- a position and a normal vector, together.  Now let's
+                 // tell it how to connect vertex entries into triangles.  Every three indices in this list makes one triangle:
+        this.indices.push( 0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
+                          14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22 );
+        // It stinks to manage arrays this big.  Later we'll show code that generates these same cube vertices more automatically.
+      }
+  }
+
 window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 class Assignment_Three_Scene extends Scene_Component
   { constructor( context, control_box )     // The scene begins by requesting the camera, shapes, and materials it will need.
       { super(   context, control_box );    // First, include a secondary Scene that provides movement controls:
         if( !context.globals.has_controls   ) 
           context.register_scene_component( new Movement_Controls( context, control_box.parentElement.insertCell() ) ); 
-
-        context.globals.graphics_state.camera_transform = Mat4.look_at( Vec.of( 0,10,20 ), Vec.of( 0,0,0 ), Vec.of( 0,1,0 ) );
+//35.05, 18.71, 181.73
+//37.5, 50,200
+        context.globals.graphics_state.camera_transform = Mat4.look_at( Vec.of( 36.59, 20.14, -40.49 ), Vec.of( 1,0,-3 ), Vec.of( 0,1,0 ) );
         this.initial_camera_location = Mat4.inverse( context.globals.graphics_state.camera_transform );
 
         const r = context.width/context.height;
         context.globals.graphics_state.projection_transform = Mat4.perspective( Math.PI/4, r, .1, 1000 );
 
-        const shapes = { torus:  new Torus( 15, 15 ),
+        const shapes = { 
+                        box: new Cube(),
+                        torus:  new Torus( 15, 15 ),
                          torus2: new ( Torus.prototype.make_flat_shaded_version() )( 15, 15 ),
  
                                 // TODO:  Fill in as many additional shape instances as needed in this key/value table.
@@ -77,68 +104,55 @@ class Assignment_Three_Scene extends Scene_Component
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
 
+        //define constants
+        const box_size = 8;
+        const row_length = 6;
+        const path_length = 10;
+        const blue = Color.of( 0,0,1,1 ), yellow = Color.of( 1,1,0,1 );
+        let model_transform = Mat4.identity().times(Mat4.scale([box_size, box_size, box_size]));
+        const tr_right = 2; 
         
+        /*
+        let camera_tr = Mat4.identity().times(Mat4.translation([36.59-45.02, 16.14-17.40, -37.49+23.59]));
+         var desired = Mat4.inverse(camera_tr);
+         desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
+         graphics_state.camera_transform = desired; 
+        */
+       // 36.59, 16.14, -37.49
+       //45.02, 17.40, -23.59
+        //draw path
+        for(var i = 1; i != path_length+1; i++){
+          for(var j = 1; j != row_length + 1; j++){
+            this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
+           
+            //create boundary on edges
+            if(j ==1 || j == row_length){
+              model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
+              model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
+            }
 
-        // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 2 and 3)
-        let model_transform = Mat4.identity();
-
-        //1. draw sun
-        let sun_transform =model_transform;
-        let sun_period = 5;
-        let sun_size = 2 + Math.sin(2*t*Math.PI/sun_period); //go from 1->3->1 in sun_period time
-        sun_transform = sun_transform.times(Mat4.scale([sun_size, sun_size, sun_size]));
-        this.shapes.sphere4.draw(graphics_state, sun_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(.4 * Math.PI * t), 0, .5 -.5 * Math.sin(.4 * Math.PI * t), 1)}));
-
-
-        //2. Point light source in center of sun
-        this.lights = [new Light(Vec.of(0,0,0,1), Color.of( .5 + .5 * Math.sin(.4 * Math.PI * t), 0, .5 - .5 * Math.sin(.4 * Math.PI * t), 1 ), 10**sun_size) ];
-    
-        
-        //Planet 1
-        let model_transform_1 = Mat4.identity();
-        model_transform_1 = model_transform_1.times(Mat4.rotation(t + 1, Vec.of(0, 1, 0))).times(Mat4.translation([5, 0, 0])).times(Mat4.rotation(t*2, Vec.of(1, 0, 0)));
-        this.shapes.sphere2.draw(graphics_state, model_transform_1, this.materials.planet_1);
-        this.planet_1 = model_transform_1;
-
-
-        //Planet 2
-        let model_transform_2 = Mat4.identity();
-        model_transform_2 = model_transform_2.times(Mat4.rotation(t*0.9 + 0.8, Vec.of(0, 1, 0))).times(Mat4.translation([8, 0, 0])).times(Mat4.rotation(t*2, Vec.of(1, 0, 0)));
-        const whole_t = Math.floor(t);
-        if(whole_t % 2 == 0){
-          this.shapes.sphere3.draw(graphics_state, model_transform_2, this.materials.planet_2); //regular smooth shading
-        }
-        else{
-           this.shapes.sphere3.draw(graphics_state, model_transform_2, this.materials.planet_2.override({gouraud: 1})); //gouraud shading
-        }
-        this.planet_2 = model_transform_2;
-  
-        
-        //Planet 3 (Wobble)
-        let model_transform_3 = Mat4.identity();
-        model_transform_3 = model_transform_3.times(Mat4.rotation(t*0.8 + 0.6, Vec.of(0, 1, .3))).times(Mat4.translation([11, 0, 6])).times(Mat4.rotation(t*2, Vec.of(1, 0, 0)));
-        this.shapes.sphere4.draw(graphics_state, model_transform_3, this.materials.planet_3);
-        this.shapes.torus.draw(graphics_state, model_transform_3.times(Mat4.scale([1, 1, .01])), this.materials.planet_3);
-        this.planet_3 = model_transform_3;
-
-        //Planet 4
-        let model_transform_4 = Mat4.identity();
-        let model_transform_5 = model_transform_4.times(Mat4.translation([1.5, 0, 0]))
-        model_transform_4 = model_transform_4.times(Mat4.rotation(t*0.7 + 0.4, Vec.of(0, 1, 0))).times(Mat4.translation([14, 0, 0])).times(Mat4.rotation(t*2, Vec.of(1, 0, 0)));
-        model_transform_5 = model_transform_5.times(model_transform_4).times(Mat4.scale([.5,.5,.5]));
-        this.shapes.sphere4.draw(graphics_state, model_transform_4, this.materials.planet_4);
-        this.shapes.sphere1.draw(graphics_state, model_transform_5, this.materials.planet_4);
-        this.planet_4 = model_transform_4;
-        this.moon = model_transform_5;
+            model_transform = model_transform.times(Mat4.translation([ tr_right,0, 0]));
+            
+          }
+          model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]))
+          model_transform = model_transform.times(Mat4.translation([0, 0, 2]))
+        }  // Draw the top box.
+      
+        /*
+        model_transform   = model_transform.times( Mat4.rotation( 1, Vec.of( 0,0,1 ) ) )  // Rotate another axis by a constant value.
+                                         .times( Mat4.scale      ([ 1,   2, 1 ]) )      // Stretch the coordinate frame.
+                                         .times( Mat4.translation([ 0,-1.5, 0 ]) );    
+        */
 
         //Attach camera 
-        
+        /*
          if(this.attached != undefined) {
           var desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5]))); 
           desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
           graphics_state.camera_transform = desired;
         }
-        
+        */
         /*
         if(this.attached === this.initial_camera_location){
           let camera_matrix = this.attached;
