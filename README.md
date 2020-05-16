@@ -5,8 +5,8 @@ WebGl Temple Run
 
 Mid-way Demo(5/17/20):
 
-  ##-create path
+  -create path
   
-  ##-instantiate player and chaser
+  -instantiate player and chaser
   
-  ##-give player ability to jump
+  -give player ability to jump
