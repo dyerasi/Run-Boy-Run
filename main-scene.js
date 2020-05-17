@@ -59,7 +59,7 @@ class Assignment_Three_Scene extends Scene_Component
                                 //        (Requirement 1)
                                 
             sun: context.get_instance(Phong_Shader).material( 
-              Color.of(1,0,0,1), 
+              Color.of(1,1,1,1),
               {ambient:1}
             ),
             planet_1: context.get_instance(Phong_Shader).material(
@@ -145,8 +145,15 @@ class Assignment_Three_Scene extends Scene_Component
        //45.02, 17.40, -23.59
 
        //draw chaser
-          let chaser_transform = model_transform.times(Mat4.translation([0, 10, 0]));
+          let chaser_transform = Mat4.identity();
+          chaser_transform = chaser_transform.times(Mat4.translation([40, 15, -1]));
+          chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
           this.shapes.sphere4.draw(graphics_state, chaser_transform, this.materials.sun);
+          this.planet_1 = chaser_transform;
+
+
+
+
        //draw player
 
 
@@ -159,13 +166,15 @@ class Assignment_Three_Scene extends Scene_Component
         */
 
         //Attach camera 
-        /*
+
          if(this.attached != undefined) {
-          var desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5]))); 
+          var desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5])));
+          desired = desired.times(Mat4.scale([1,1,-1]));
+          desired = desired.times(Mat4.translation([0,-8,4]));
           desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
           graphics_state.camera_transform = desired;
         }
-        */
+
         /*
         if(this.attached === this.initial_camera_location){
           let camera_matrix = this.attached;
