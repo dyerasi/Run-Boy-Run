@@ -102,24 +102,49 @@ class Assignment_Three_Scene extends Scene_Component
       }
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
       const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+       
        //draw path
+       
+
         for(var i = 1; i != path_length+1; i++){
           for(var j = 1; j != row_length + 1; j++){
-            this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
-           
+            //this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5, .5, .5, 1)})); 
+
             //create boundary on edges
-            if(j ==1 || j == row_length){
+            if((j ==1 || j == row_length))
+            {
+             
+
               model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
+
+              
               this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
               model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
+
+
             }
 
+           
             model_transform = model_transform.times(Mat4.translation([ tr_right,0, 0]));
             
-          }
-          model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]))
-          model_transform = model_transform.times(Mat4.translation([0, 0, 2]))
-        }  
+
+          } //for loop for j
+           model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]));
+
+            
+           if(i % 110 == 0 || i % 20 == 0 || i % 45 == 0) //create a pit at cycles of 20, 45, and 100
+           {
+             for (let k = 0; k < 3; k++)
+               model_transform = model_transform.times(Mat4.translation([0, 0, 2]));
+           }
+           else
+           {
+             model_transform = model_transform.times(Mat4.translation([0, 0, 2]));
+           }
+
+
+        } //for loop for i
     }
     display( graphics_state )
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
