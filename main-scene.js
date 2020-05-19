@@ -160,7 +160,7 @@ class Assignment_Three_Scene extends Scene_Component
           player_transform = player_transform.times(Mat4.translation([0,0,player_speed]));
           player_transform = player_transform.times(Mat4.scale([1,3,1]));
 
-          this.shapes.box.draw(graphics_state, player_transform, this.materials.planet_3);
+          this.shapes.box.draw(graphics_state, player_transform, this.materials.planet_4);
 
         //camera position
           this.planet_1 = camera_model_transform;
