@@ -59,7 +59,7 @@ class Assignment_Three_Scene extends Scene_Component
                                 //        (Requirement 1)
                                 
             sun: context.get_instance(Phong_Shader).material( 
-              Color.of(1,0,0,1), 
+              Color.of(1,0,1,1),
               {ambient:1}
             ),
             planet_1: context.get_instance(Phong_Shader).material(
@@ -101,6 +101,8 @@ class Assignment_Three_Scene extends Scene_Component
         this.key_triggered_button( "Attach to moon",     [ "m" ], () => this.attached = () => this.moon     );
       }
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
+      let grey = Color.of(169/255,169/255,169/255, 1);
+      let yellow = Color.of(1,1,0,1);
       const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
        
        //draw path
@@ -108,18 +110,27 @@ class Assignment_Three_Scene extends Scene_Component
 
         for(var i = 1; i != path_length+1; i++){
           for(var j = 1; j != row_length + 1; j++){
+<<<<<<< HEAD
             //this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
               this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5, .5, .5, 1)})); 
 
+=======
+            this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color: grey}));
+           
+>>>>>>> master
             //create boundary on edges
             if((j ==1 || j == row_length))
             {
              
 
               model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
+<<<<<<< HEAD
 
               
               this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
+=======
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color: Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)}));
+>>>>>>> master
               model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
 
 
@@ -160,49 +171,44 @@ class Assignment_Three_Scene extends Scene_Component
         
         //draw_path
         this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state);
-        /*
-        let camera_tr = Mat4.identity().times(Mat4.translation([36.59-45.02, 16.14-17.40, -37.49+23.59]));
-         var desired = Mat4.inverse(camera_tr);
-         desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
-         graphics_state.camera_transform = desired; 
-        */
-       // 36.59, 16.14, -37.49
-       //45.02, 17.40, -23.59
 
-       //draw chaser
-          let chaser_transform = model_transform.times(Mat4.translation([0, 10, 0]));
-          this.shapes.sphere4.draw(graphics_state, chaser_transform, this.materials.sun);
+
+        //draw chaser
+          let chaser_transform = Mat4.identity();
+          chaser_transform = chaser_transform.times(Mat4.translation([40, 15, -1]));
+          const player_model_transform = chaser_transform.times(Mat4.translation([0, 0, 10]));
+          //chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
+          let camera_model_transform = chaser_transform.times(Mat4.translation([0,0,9]));
+          const chaser_speed = 5*t;
+          chaser_transform = chaser_transform.times(Mat4.translation([0,0, chaser_speed]));
+          chaser_transform = chaser_transform.times(Mat4.rotation(8*t, Vec.of(1,0,0) ));
+          chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
+
+          this.shapes.sphere2.draw(graphics_state, chaser_transform, this.materials.sun);
+
+
        //draw player
+          let player_transform = player_model_transform;
+          player_transform = player_transform.times(Mat4.translation([0,0,5]));
+          const player_speed = chaser_speed + 5;
+          player_transform = player_transform.times(Mat4.translation([0,0,player_speed]));
+          player_transform = player_transform.times(Mat4.scale([1,3,1]));
+
+          this.shapes.box.draw(graphics_state, player_transform, this.materials.planet_4);
+
+        //camera position
+          this.planet_1 = camera_model_transform;
 
 
-       // Draw the top box.
-      
-        /*
-        model_transform   = model_transform.times( Mat4.rotation( 1, Vec.of( 0,0,1 ) ) )  // Rotate another axis by a constant value.
-                                         .times( Mat4.scale      ([ 1,   2, 1 ]) )      // Stretch the coordinate frame.
-                                         .times( Mat4.translation([ 0,-1.5, 0 ]) );    
-        */
+        //Attach camera
 
-        //Attach camera 
-        /*
-         if(this.attached != undefined) {
-          var desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5]))); 
+          var desired = Mat4.inverse(this.planet_1.times(Mat4.translation([0,0,5])));
+          desired = desired.times(Mat4.scale([1,1,-1]));
+          desired = desired.times(Mat4.translation([0,-10,4]));
+          desired = desired.times(Mat4.translation([0,0,-1*chaser_speed]));
           desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
           graphics_state.camera_transform = desired;
-        }
-        */
-        /*
-        if(this.attached === this.initial_camera_location){
-          let camera_matrix = this.attached;
-          graphics_state.camera_transform = Mat4.inverse(camera_matrix)
-            .map((x, i)=> Vec.from(graphics_state.camera_transform[i]).mix(x, .1));
-        } else if(this.attached != undefined) {
-                    let camera_matrix = this.attached;
-          let camera_planet_transform = Mat4.translation([0,0,-5]).times(Mat4.inverse(camera_matrix));
-          graphics_state.camera_transform = camera_planet_transform.map((x, i)=> Vec.from(graphics_state.camera_transform[i]).mix(x, .1));
-        }
-        */
-       
+
       }
   }
 
