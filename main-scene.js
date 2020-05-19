@@ -110,27 +110,19 @@ class Assignment_Three_Scene extends Scene_Component
 
         for(var i = 1; i != path_length+1; i++){
           for(var j = 1; j != row_length + 1; j++){
-<<<<<<< HEAD
-            //this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
-              this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5, .5, .5, 1)})); 
 
-=======
             this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color: grey}));
            
->>>>>>> master
+
             //create boundary on edges
             if((j ==1 || j == row_length))
             {
              
 
               model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
-<<<<<<< HEAD
 
-              
-              this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color:Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)})); 
-=======
               this.shapes.box.draw( graphics_state, model_transform, this.materials.sun.override({color: Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)}));
->>>>>>> master
+
               model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
 
 
