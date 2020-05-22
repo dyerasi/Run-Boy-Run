@@ -554,7 +554,7 @@ class Scene_Component       // The Scene_Component superclass is the base class 
                                                         // elements made this way.
       parent.appendChild( Object.assign( document.createElement( "div"  ), { className:"live_string", onload: callback } ) );
     }
-  key_triggered_button( description, shortcut_combination, callback, color = '#'+Math.random().toString(9).slice(-6), 
+ key_triggered_button( description, shortcut_combination, callback, color = '#'+Math.random().toString(9).slice(-6), 
                         release_event, recipient = this, parent = this.control_panel )      // Trigger any scene behavior by assigning a key
     { const button = parent.appendChild( document.createElement( "button" ) );              // shortcut and a labelled HTML button to it.
       button.default_color = button.style.backgroundColor = color;
