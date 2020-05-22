@@ -41,6 +41,8 @@ class Assignment_Three_Scene extends Scene_Component
         var left_bool = 0;
         var right_bool = 0;
         var jump_end = 0;
+        var right_end = 0;
+        var left_end = 0;
 
 
         const shapes = { 
@@ -194,7 +196,7 @@ class Assignment_Three_Scene extends Scene_Component
           let jump_height = 5;
           const movement_time = .5;
           //jump activated
-          if(this.jump_bool){
+          if(this.jump_bool && !(this.jump_end > t)){
                this.jump_end = t + movement_time;
                this.jump_bool = 0;
 //                console.log("Jump");
@@ -206,15 +208,22 @@ class Assignment_Three_Scene extends Scene_Component
           }
 
           //move left
-          if(this.left_bool){
+          if(this.left_bool && !(this.left_end > t)){
+            this.left_end = t + movement_time;
             console.log("Left");
-            player_transform = player_transform.times(Mat4.translation([-16, 0, 0]));
             this.left_bool = 0;
           }
+          if(this.left_end > t){
+            player_transform = player_transform.times(Mat4.translation([-9*((this.left_end-t)/movement_time), 0, 0]));
+          }
           //move right
-          if(this.right_bool){
+          if(this.right_bool && !(this.right_end > t)){
+            this.right_end = t + movement_time;
             console.log("Right");
             this.right_bool = 0;
+          }
+          if(this.right_end > t){
+            player_transform = player_transform.times(Mat4.translation([9*((this.right_end-t)/movement_time), 0, 0]));
           }
           
           player_transform = player_transform.times(Mat4.translation([0,0,5]));
