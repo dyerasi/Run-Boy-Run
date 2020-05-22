@@ -35,6 +35,13 @@ class Assignment_Three_Scene extends Scene_Component
 
         const r = context.width/context.height;
         context.globals.graphics_state.projection_transform = Mat4.perspective( Math.PI/4, r, .1, 1000 );
+        
+        //movement booleans
+        var jump_bool = 0; 
+        var left_bool = 0;
+        var right_bool = 0;
+        var jump_end = 0;
+
 
         const shapes = { 
                         box: new Cube(),
@@ -85,20 +92,17 @@ class Assignment_Three_Scene extends Scene_Component
               {specularity: 1},
               {ambient: 0}
             ),
-          
+
           }
 
         this.lights = [ new Light( Vec.of( 5,-10,5,1 ), Color.of( 0, 1, 1, 1 ), 1000 ) ];
       }
     make_control_panel()            // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-      { this.key_triggered_button( "View solar system",  [ "0" ], () => this.attached = () => this.initial_camera_location );
+      { //this.key_triggered_button( "Intial",  [ "0" ], () => this.attached = () => this.initial_camera_location );
         this.new_line();
-        this.key_triggered_button( "Attach to planet 1", [ "1" ], () => this.attached = () => this.planet_1 );
-        this.key_triggered_button( "Attach to planet 2", [ "2" ], () => this.attached = () => this.planet_2 ); this.new_line();
-        this.key_triggered_button( "Attach to planet 3", [ "3" ], () => this.attached = () => this.planet_3 );
-        this.key_triggered_button( "Attach to planet 4", [ "4" ], () => this.attached = () => this.planet_4 ); this.new_line();
-        this.key_triggered_button( "Attach to planet 5", [ "5" ], () => this.attached = () => this.planet_5 );
-        this.key_triggered_button( "Attach to moon",     [ "m" ], () => this.attached = () => this.moon     );
+        this.key_triggered_button( "Jump",     [ " " ], () => this.jump_bool = 0, undefined, () => this.jump_bool = 1 );
+        this.key_triggered_button( "Left",     [ "a" ], () => this.left_bool = 0, undefined, () => this.left_bool = 1 );
+        this.key_triggered_button( "Right",     [ "s" ], () => this.right_bool = 0, undefined, () => this.right_bool = 1 );
       }
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
       let grey = Color.of(169/255,169/255,169/255, 1);
@@ -149,6 +153,7 @@ class Assignment_Three_Scene extends Scene_Component
 
         } //for loop for i
     }
+
     display( graphics_state )
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
@@ -180,7 +185,38 @@ class Assignment_Three_Scene extends Scene_Component
 
 
        //draw player
+       /*
+          if(this.jump_end == undefined){
+            this.jump_end = 0;
+          }
+          */
           let player_transform = player_model_transform;
+          let jump_height = 5;
+          const movement_time = .5;
+          //jump activated
+          if(this.jump_bool){
+               this.jump_end = t + movement_time;
+               this.jump_bool = 0;
+//                console.log("Jump");
+          }
+          if(this.jump_end > t){
+            //let t_ex = 1 + Math.cos(Math.pi/2+ (movement_time-(this.jump_end-t)) * Math.pi*2/movement_time );
+            //console.log(this.t_ex);
+            player_transform = player_transform.times(Mat4.translation([0, jump_height*((this.jump_end-t)/movement_time), 0]));
+          }
+
+          //move left
+          if(this.left_bool){
+            console.log("Left");
+            player_transform = player_transform.times(Mat4.translation([-16, 0, 0]));
+            this.left_bool = 0;
+          }
+          //move right
+          if(this.right_bool){
+            console.log("Right");
+            this.right_bool = 0;
+          }
+          
           player_transform = player_transform.times(Mat4.translation([0,0,5]));
           const player_speed = chaser_speed + 5;
           player_transform = player_transform.times(Mat4.translation([0,0,player_speed]));
