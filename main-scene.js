@@ -1,26 +1,3 @@
-window.Cube = window.classes.Cube =
-class Cube extends Shape                 // Here's a complete, working example of a Shape subclass.  It is a blueprint for a cube.
-  { constructor()
-      { super( "positions", "normals" ); // Name the values we'll define per each vertex.  They'll have positions and normals.
-
-        // First, specify the vertex positions -- just a bunch of points that exist at the corners of an imaginary cube.
-        this.positions.push( ...Vec.cast( [-1,-1,-1], [1,-1,-1], [-1,-1,1], [1,-1,1], [1,1,-1],  [-1,1,-1],  [1,1,1],  [-1,1,1],
-                                          [-1,-1,-1], [-1,-1,1], [-1,1,-1], [-1,1,1], [1,-1,1],  [1,-1,-1],  [1,1,1],  [1,1,-1],
-                                          [-1,-1,1],  [1,-1,1],  [-1,1,1],  [1,1,1], [1,-1,-1], [-1,-1,-1], [1,1,-1], [-1,1,-1] ) );
-        // Supply vectors that point away from eace face of the cube.  They should match up with the points in the above list
-        // Normal vectors are needed so the graphics engine can know if the shape is pointed at light or not, and color it accordingly.
-        this.normals.push(   ...Vec.cast( [0,-1,0], [0,-1,0], [0,-1,0], [0,-1,0], [0,1,0], [0,1,0], [0,1,0], [0,1,0], [-1,0,0], [-1,0,0],
-                                          [-1,0,0], [-1,0,0], [1,0,0],  [1,0,0],  [1,0,0], [1,0,0], [0,0,1], [0,0,1], [0,0,1],   [0,0,1],
-                                          [0,0,-1], [0,0,-1], [0,0,-1], [0,0,-1] ) );
-
-                 // Those two lists, positions and normals, fully describe the "vertices".  What's the "i"th vertex?  Simply the combined
-                 // data you get if you look up index "i" of both lists above -- a position and a normal vector, together.  Now let's
-                 // tell it how to connect vertex entries into triangles.  Every three indices in this list makes one triangle:
-        this.indices.push( 0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
-                          14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22 );
-        // It stinks to manage arrays this big.  Later we'll show code that generates these same cube vertices more automatically.
-      }
-  }
 
 window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 class Assignment_Three_Scene extends Scene_Component
@@ -50,6 +27,7 @@ class Assignment_Three_Scene extends Scene_Component
                          sphere4: new (Subdivision_Sphere)(4)
                        }
 
+        //shapes.box.texture_coords = shapes.box.texture_coords.map(v => Vec.of(v[0], v[1]));
         this.submit_shapes( context, shapes );
                                      
                                      // Make some Material objects available to you:
@@ -57,14 +35,24 @@ class Assignment_Three_Scene extends Scene_Component
           { test:     context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ), { ambient:.2 } ),
 
             path: context.get_instance(Phong_Shader).material(
-              Color.of(1,0,1,1),
-              {ambient:1}
+                  Color.of(0,0,0,1),
+                {
+                  ambient: 1,
+                  texture: context.get_instance("./assets/grass3.png", false),
+                }
             ),
 
             player: context.get_instance(Phong_Shader).material(
               Color.of(0.678, 0.847, 0.902, 1), //soft light blue
               {specularity: 1},
               {ambient: 1}
+            ),
+
+            chaser: context.get_instance(Phong_Shader).material(
+                Color.of(181/255,101/255,29/155,1),
+                {
+                  ambient: 1
+                }
             ),
           }
 
@@ -74,9 +62,9 @@ class Assignment_Three_Scene extends Scene_Component
     make_control_panel()            // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
       { //this.key_triggered_button( "Intial",  [ "0" ], () => this.attached = () => this.initial_camera_location );
         this.new_line();
-        this.key_triggered_button( "Jump",     [ " " ], () => this.jump_bool = 0, undefined, () => this.jump_bool = 1 );
-        this.key_triggered_button( "Left",     [ "a" ], () => this.left_bool = 0, undefined, () => this.left_bool = 1 );
-        this.key_triggered_button( "Right",     [ "s" ], () => this.right_bool = 0, undefined, () => this.right_bool = 1 );
+        this.key_triggered_button( "Jump",     [ " " ], () => this.jump_bool = 1, undefined, () => this.jump_bool = 0 );
+        this.key_triggered_button( "Left",     [ "a" ], () => this.left_bool = 1, undefined, () => this.left_bool = 0 );
+        this.key_triggered_button( "Right",     [ "d" ], () => this.right_bool = 1, undefined, () => this.right_bool = 0 );
       }
 
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
@@ -86,7 +74,7 @@ class Assignment_Three_Scene extends Scene_Component
        //draw path
         for(let i = 1; i !== path_length+1; i++){
           for(let j = 1; j !== row_length + 1; j++){
-            this.shapes.box.draw( graphics_state, model_transform, this.materials.path.override({color: grey}));
+            this.shapes.box.draw( graphics_state, model_transform, this.materials.path);//.override({color: grey}));
             //create boundary on edges
             if((j ===1 || j === row_length))
             {
@@ -138,7 +126,7 @@ class Assignment_Three_Scene extends Scene_Component
           chaser_transform = chaser_transform.times(Mat4.rotation(8*t, Vec.of(1,0,0) ));
           chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
 
-          this.shapes.sphere2.draw(graphics_state, chaser_transform, this.materials.path);
+          this.shapes.sphere2.draw(graphics_state, chaser_transform, this.materials.chaser);//path.override({color: Color.of(1,0,1,1)}));
 
 
        //draw player
@@ -202,3 +190,24 @@ class Assignment_Three_Scene extends Scene_Component
 
       }
   }
+
+class Texture_Rotate extends Phong_Shader {
+  fragment_glsl_code() {
+    // ********* FRAGMENT SHADER *********
+    // TODO:  Modify the shader below (right now it's just the same fragment shader as Phong_Shader) for requirement #7.
+    return `
+        uniform sampler2D texture;
+        void main()
+        { if( GOURAUD || COLOR_NORMALS )    // Do smooth "Phong" shading unless options like "Gouraud mode" are wanted instead.
+          { gl_FragColor = VERTEX_COLOR;    // Otherwise, we already have final colors to smear (interpolate) across vertices.            
+            return;
+          }                                 // If we get this far, calculate Smooth "Phong" Shading as opposed to Gouraud Shading.
+                                            // Phong shading is not to be confused with the Phong Reflection Model.
+          vec4 tex_color = texture2D( texture, f_tex_coord );                         // Sample the texture image in the correct place.
+                                                                                      // Compute an initial (ambient) color:
+          if( USE_TEXTURE ) gl_FragColor = vec4( ( tex_color.xyz + shapeColor.xyz ) * ambient, shapeColor.w * tex_color.w ); 
+          else gl_FragColor = vec4( shapeColor.xyz * ambient, shapeColor.w );
+          gl_FragColor.xyz += phong_model_lights( N );                     // Compute the final color with contributions from lights.
+        }`;
+  }
+}
