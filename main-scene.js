@@ -38,9 +38,25 @@ class Assignment_Three_Scene extends Scene_Component
                   Color.of(0,0,0,1),
                 {
                   ambient: 1,
-                  texture: context.get_instance("./assets/grass3.png", false),
+                  texture: context.get_instance("./assets/road.jpg", false),
                 }
             ),
+
+            shrub: context.get_instance(Phong_Shader).material(
+                  Color.of(0,0,0,1),
+                  {
+                      ambient: 1,
+                      texture: context.get_instance("./assets/grass3.png", false),
+                  }
+              ),
+
+            boundary: context.get_instance(Phong_Shader).material(
+                  Color.of(0,0,0,1),
+                  {
+                      ambient: 1,
+                      texture: context.get_instance("./assets/grass4.jpg", false),
+                  }
+              ),
 
             player: context.get_instance(Phong_Shader).material(
               Color.of(0.678, 0.847, 0.902, 1), //soft light blue
@@ -67,19 +83,30 @@ class Assignment_Three_Scene extends Scene_Component
         this.key_triggered_button( "Right",     [ "d" ], () => this.right_bool = 1, undefined, () => this.right_bool = 0 );
       }
 
+
+
+
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
       let grey = Color.of(169/255,169/255,169/255, 1);
       const t = graphics_state.animation_time / 1000;
-       
+      let cur = 2;
+
        //draw path
         for(let i = 1; i !== path_length+1; i++){
           for(let j = 1; j !== row_length + 1; j++){
-            this.shapes.box.draw( graphics_state, model_transform, this.materials.path);//.override({color: grey}));
+
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.path);
+
+            if(( j % 6 === 3 ) && (i % 10 === 0 || i % 10 === 7)){
+                this.shapes.sphere2.draw( graphics_state, model_transform.times(Mat4.translation([cur,1,0])), this.materials.shrub);
+                cur = -1 * cur;
+            }
+
             //create boundary on edges
             if((j ===1 || j === row_length))
             {
               model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
-              this.shapes.box.draw( graphics_state, model_transform, this.materials.path.override({color: Color.of(.5 + .5 * Math.sin(i * Math.PI * t), 0, .5 -.5 * Math.sin(j * Math.PI * t), 1)}));
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.boundary);
               model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
             }
             model_transform = model_transform.times(Mat4.translation([ tr_right,0, 0]));
@@ -102,6 +129,7 @@ class Assignment_Three_Scene extends Scene_Component
     display( graphics_state )
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+        const p_t = graphics_state.animation_time;
 
         //define constants
         const box_size = 8;
@@ -121,12 +149,15 @@ class Assignment_Three_Scene extends Scene_Component
           const player_model_transform = chaser_transform.times(Mat4.translation([0, 0, 10]));
           //chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
           let camera_model_transform = chaser_transform.times(Mat4.translation([0,0,9]));
-          const chaser_speed = 5*t;
+
+          const chaser_speed = 17*t;
           chaser_transform = chaser_transform.times(Mat4.translation([0,0, chaser_speed]));
+
           chaser_transform = chaser_transform.times(Mat4.rotation(8*t, Vec.of(1,0,0) ));
           chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
 
           this.shapes.sphere2.draw(graphics_state, chaser_transform, this.materials.chaser);//path.override({color: Color.of(1,0,1,1)}));
+
 
 
        //draw player
