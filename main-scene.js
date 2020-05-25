@@ -67,12 +67,19 @@ class Assignment_Three_Scene extends Scene_Component
             chaser: context.get_instance(Phong_Shader).material(
                 Color.of(181/255,101/255,29/155,1),
                 {
-                  ambient: 1
+                  ambient: 1,
+                  gouraud: 1,
                 }
             ),
           }
 
         this.lights = [ new Light( Vec.of( 5,-10,5,1 ), Color.of( 0, 1, 1, 1 ), 1000 ) ];
+        //player and chaser state
+        this.chaser_transform = Mat4.identity().times(Mat4.translation([40, 15, -1]));
+        this.player_transform = this.chaser_transform.times(Mat4.translation([0, 0, 10])).times(Mat4.translation([0,0,5]));
+        this.camera_model_transform = Mat4.identity().times(Mat4.translation([40, 15, -1])).times(Mat4.translation([0,0,9]));
+
+
       }
 
     make_control_panel()            // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
@@ -128,7 +135,7 @@ class Assignment_Three_Scene extends Scene_Component
 
     display( graphics_state )
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-        const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+        let t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
         const p_t = graphics_state.animation_time;
 
         //define constants
@@ -144,78 +151,81 @@ class Assignment_Three_Scene extends Scene_Component
 
 
         //draw chaser
-          let chaser_transform = Mat4.identity();
-          chaser_transform = chaser_transform.times(Mat4.translation([40, 15, -1]));
-          const player_model_transform = chaser_transform.times(Mat4.translation([0, 0, 10]));
-          //chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
-          let camera_model_transform = chaser_transform.times(Mat4.translation([0,0,9]));
+          const chaser_speed = 17*dt;
+          this.chaser_transform = this.chaser_transform.times(Mat4.translation([0,0, chaser_speed]));
+          this.camera_model_transform = this.camera_model_transform.times(Mat4.translation([0,0, -1*chaser_speed]));
 
-          const chaser_speed = 17*t;
-          chaser_transform = chaser_transform.times(Mat4.translation([0,0, chaser_speed]));
-
-          chaser_transform = chaser_transform.times(Mat4.rotation(8*t, Vec.of(1,0,0) ));
-          chaser_transform = chaser_transform.times(Mat4.scale([4,4,4]));
-
-          this.shapes.sphere2.draw(graphics_state, chaser_transform, this.materials.chaser);//path.override({color: Color.of(1,0,1,1)}));
-
+          this.chaser_transform = this.chaser_transform.times(Mat4.rotation(dt, Vec.of(0,0,1) ));
+          this.shapes.sphere2.draw(graphics_state, this.chaser_transform.times(Mat4.scale([4,4,4])), this.materials.chaser);
 
 
        //draw player
-       /*
-          if(this.jump_end == undefined){
-            this.jump_end = 0;
-          }
-          */
-          let player_transform = player_model_transform;
-          let jump_height = 5;
+          let jump_height = 10;
           const movement_time = .5;
+          const player_speed = chaser_speed;
+
           //jump activated
-          if(this.jump_bool && !(this.jump_end > t)){
+          if(this.jump_bool===1 && !(this.jump_end > t)){
                this.jump_end = t + movement_time;
-               this.jump_bool = 0;
+               //this.jump_bool = 0;
 //                console.log("Jump");
           }
           if(this.jump_end > t){
-            //let t_ex = 1 + Math.cos(Math.pi/2+ (movement_time-(this.jump_end-t)) * Math.pi*2/movement_time );
-            //console.log(this.t_ex);
-            player_transform = player_transform.times(Mat4.translation([0, jump_height*((this.jump_end-t)/movement_time), 0]));
+            this.player_transform = this.player_transform.times(Mat4.translation([0, jump_height*((this.jump_end-t)/movement_time), 5]));
+            this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
+            this.player_transform = this.player_transform.times(Mat4.translation([0, -1* jump_height*((this.jump_end-t)/movement_time), 0]));
+            //this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
+            this.chaser_transform = this.chaser_transform.times(Mat4.translation([0,0,5]));
+            this.camera_model_transform = this.camera_model_transform.times(Mat4.translation([0,0,-5]));
+            this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+            this.jump_bool = 0;
           }
 
+
           //move left
-          if(this.left_bool && !(this.left_end > t)){
+          else if(this.left_bool && !(this.left_end > t)){
             this.left_end = t + movement_time;
             console.log("Left");
             this.left_bool = 0;
+            this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+            this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
-          if(this.left_end > t){
-            player_transform = player_transform.times(Mat4.translation([-9*((this.left_end-t)/movement_time), 0, 0]));
+
+          else if(this.left_end > t){
+            this.player_transform = this.player_transform.times(Mat4.translation([-2*((this.left_end-t)/movement_time), 0, 0]));
+            this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+            this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
+
           //move right
-          if(this.right_bool && !(this.right_end > t)){
-            this.right_end = t + movement_time;
-            console.log("Right");
-            this.right_bool = 0;
+          else if(this.right_bool && !(this.right_end > t)){
+              this.right_end = t + movement_time;
+              console.log("Right");
+              this.right_bool = 0;
+              this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+              this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
-          if(this.right_end > t){
-            player_transform = player_transform.times(Mat4.translation([9*((this.right_end-t)/movement_time), 0, 0]));
+
+          else if(this.right_end > t){
+              this.player_transform = this.player_transform.times(Mat4.translation([2*((this.right_end-t)/movement_time), 0, 0]));
+              this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+              this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
-          
-          player_transform = player_transform.times(Mat4.translation([0,0,5]));
-          const player_speed = chaser_speed + 5;
-          player_transform = player_transform.times(Mat4.translation([0,0,player_speed]));
-          player_transform = player_transform.times(Mat4.scale([1,3,1]));
 
-          this.shapes.box.draw(graphics_state, player_transform, this.materials.player);
+          else{
+              this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
+              this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
+          }
 
-        // ***Camera Calculations***
+
         //camera position
-          this.planet_1 = camera_model_transform;
+          this.camera = this.camera_model_transform;
 
         //Attach camera
-          let desired = Mat4.inverse(this.planet_1.times(Mat4.translation([0,0,5])));
+          let desired = Mat4.inverse(this.camera.times(Mat4.translation([0,0,5])));
           desired = desired.times(Mat4.scale([1,1,-1]));
           desired = desired.times(Mat4.translation([0,-10,4]));
-          desired = desired.times(Mat4.translation([0,0,-1*chaser_speed]));
+          //desired = desired.times(Mat4.translation([0,0,chaser_speed]));
           desired = desired.map((x, i) => Vec.from( graphics_state.camera_transform[i]).mix(x, .1));
           graphics_state.camera_transform = desired;
 
