@@ -10,7 +10,6 @@ class Assignment_Three_Scene extends Scene_Component
 
         const r = context.width/context.height;
         context.globals.graphics_state.projection_transform = Mat4.perspective( Math.PI/4, r, .1, 1000 );
-        
         // ***movement booleans***
         this.jump_bool = 0;
         this.left_bool = 0;
@@ -18,6 +17,10 @@ class Assignment_Three_Scene extends Scene_Component
         this.jump_end = 0;
         this.right_end = 0;
         this.left_end = 0;
+
+        //player movement constraints
+        this.player_left_limit = 21;
+        this.player_right_limit = 61;
 
 
         const shapes = {
@@ -91,8 +94,25 @@ class Assignment_Three_Scene extends Scene_Component
       }
 
 
-
-
+    collision_detected(x_coord, y_coord, z_coord, obstacle_x, obstacle_y, obstacle_z, obstacle_width){
+                 if(x_coord-obstacle_width < obstacle_x && x_coord+obstacle_width > obstacle_x ){
+                        if(z_coord-obstacle_width < obstacle_z && z_coord+obstacle_width > obstacle_z){
+                              if(this.jump_end > 0){ //y_coord >= obstacle_y + 3 && 
+                                 // console.log("hit but not y " + y_coord + " jump_time:"+this.jump_end);
+                                    return false;
+                              }
+                              //console.log("hit: " + y_coord + "obstacle y: " + obstacle_y);
+                              //console.log(this.jump_end);
+                              return true;
+                        }
+                 }
+                 return false;
+    }
+    
+    game_over(t){
+        alert("GAME OVER\nYou survived for: " + t.toFixed(2) + " seconds!");
+        document.location.reload();
+    }
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
       let grey = Color.of(169/255,169/255,169/255, 1);
       const t = graphics_state.animation_time / 1000;
@@ -103,12 +123,35 @@ class Assignment_Three_Scene extends Scene_Component
           for(let j = 1; j !== row_length + 1; j++){
 
               this.shapes.box.draw( graphics_state, model_transform, this.materials.path);
-
-            if(( j % 6 === 3 ) && (i % 10 === 0 || i % 10 === 7)){
-                this.shapes.sphere2.draw( graphics_state, model_transform.times(Mat4.translation([cur,1,0])), this.materials.shrub);
-                cur = -1 * cur;
+            
+           
+            if( i > 7 && ( j % 6 === 3 ) && (i % 10 === 0 || i % 10 === 7 || i%10 === 5) ){
+                 model_transform = model_transform.times(Mat4.translation([cur,1.5,0]));
+                 if(i%10 === 5){
+                     model_transform = model_transform.times(Mat4.translation([2,0,0]));
+                 }
+             
+                 
+                 //player shrub collision 
+                if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 6)){
+                      this.game_over(t);
+                }
+                //chaser scrub collision
+                if(!((this.chaser_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==32 || model_transform[0][3]==48))){
+                    this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub);
+                }
+//                 if(!this.collision_detected(this.chaser_transform[0][3], this.chaser_transform[1][3], this.chaser_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 16)){
+//                     this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub);
+//                 }
+                  cur = -1 * cur;
+                  model_transform = model_transform.times(Mat4.translation([cur,-1.5,0]));
+                  if(i%10 === 5){
+                     model_transform = model_transform.times(Mat4.translation([-2,0,0]));
+                  }
+                  
             }
-
+            
+            
             //create boundary on edges
             if((j ===1 || j === row_length))
             {
@@ -122,8 +165,16 @@ class Assignment_Three_Scene extends Scene_Component
            model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]));
            if(i % 110 === 0 || i % 20 === 0 || i % 45 === 0) //create a pit at cycles of 20, 45, and 100
            {
-             for (let k = 0; k < 3; k++)
+             const pit_start = model_transform[2][3];
+             for (let k = 0; k < 3; k++){
                model_transform = model_transform.times(Mat4.translation([0, 0, 2]));
+             }
+             const pit_end = model_transform[2][3];
+            // console.log(pit_start + " : " + pit_end);
+             if(i > 7 && pit_start <= this.player_transform[2][3] && this.player_transform[2][3] <= pit_end-16 && this.jump_end == 0){
+                         console.log("fell into pit");
+                         this.game_over(t);
+             }
            }
            else
            {
@@ -148,7 +199,7 @@ class Assignment_Three_Scene extends Scene_Component
         
         //draw_path
         this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state);
-
+ 
 
         //draw chaser
           const chaser_speed = 17*dt;
@@ -160,8 +211,8 @@ class Assignment_Three_Scene extends Scene_Component
 
 
        //draw player
-          let jump_height = 10;
-          const movement_time = .5;
+          let jump_height = 18;
+          const movement_time = 0.7;
           const player_speed = chaser_speed;
 
           //jump activated
@@ -183,31 +234,31 @@ class Assignment_Three_Scene extends Scene_Component
 
 
           //move left
-          else if(this.left_bool && !(this.left_end > t)){
+          else if(this.left_bool && !(this.left_end > t)  && this.player_left_limit < this.player_transform[0][3]){
             this.left_end = t + movement_time;
-            console.log("Left");
+          //  console.log("Left");
             this.left_bool = 0;
             this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
             this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
 
           else if(this.left_end > t){
-            this.player_transform = this.player_transform.times(Mat4.translation([-2*((this.left_end-t)/movement_time), 0, 0]));
+            this.player_transform = this.player_transform.times(Mat4.translation([-1.1*((this.left_end-t)/movement_time), 0, 0]));
             this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
             this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
 
           //move right
-          else if(this.right_bool && !(this.right_end > t)){
+          else if(this.right_bool && !(this.right_end > t) && this.player_right_limit > this.player_transform[0][3]){
               this.right_end = t + movement_time;
-              console.log("Right");
+             // console.log("Right");
               this.right_bool = 0;
               this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
               this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
 
           else if(this.right_end > t){
-              this.player_transform = this.player_transform.times(Mat4.translation([2*((this.right_end-t)/movement_time), 0, 0]));
+              this.player_transform = this.player_transform.times(Mat4.translation([1.1*((this.right_end-t)/movement_time), 0, 0]));
               this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
               this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
@@ -215,6 +266,7 @@ class Assignment_Three_Scene extends Scene_Component
           else{
               this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
               this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
+              this.jump_end = 0;
           }
 
 
