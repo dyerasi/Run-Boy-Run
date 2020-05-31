@@ -1,5 +1,5 @@
 //global ring count variable
-let ring_count = 0;
+//let ring_count = 0;
 
 window.Game_Scene = window.classes.Game_Scene =
 class Game_Scene extends Scene_Component
@@ -19,6 +19,7 @@ class Game_Scene extends Scene_Component
         this.jump_end = 0;
         this.right_end = 0;
         this.left_end = 0;
+        this.ring_count = 0;
 
         //player movement constraints
         this.player_left_limit = 21;
@@ -104,6 +105,9 @@ class Game_Scene extends Scene_Component
         this.timeElement = document.querySelector("#time");
         this.timeNode = document.createTextNode("");
         this.timeElement.appendChild(this.timeNode);
+        this.scoreElement = document.querySelector("#score");
+        this.scoreNode = document.createTextNode("");
+        this.scoreElement.appendChild(this.scoreNode);
 
       }
 
@@ -189,8 +193,9 @@ class Game_Scene extends Scene_Component
 
                     if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
                     {
-                      ring_count = ring_count + 1;
-                      alert("ring grabbed!");
+                      this.ring_count = this.ring_count + 1;
+                      this.scoreNode.nodeValue = this.ring_count;
+                      //alert("ring grabbed!");
                     }
                 
                     if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
@@ -212,7 +217,8 @@ class Game_Scene extends Scene_Component
 
                     if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
                     {
-                      ring_count = ring_count + 1;
+                      this.ring_count = this.ring_count + 1;
+                      this.scoreNode.nodeValue = this.ring_count;
                     }
                 
                     if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
@@ -265,6 +271,7 @@ class Game_Scene extends Scene_Component
 
 
         this.timeNode.nodeValue = t.toFixed(2);
+        this.scoreNode.nodeValue = this.ring_count;
         //define constants
         const box_size = 8;
         const row_length = 6;
