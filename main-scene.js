@@ -1,3 +1,5 @@
+//global ring count variable
+let ring_count = 0;
 
 window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 class Assignment_Three_Scene extends Scene_Component
@@ -27,7 +29,8 @@ class Assignment_Three_Scene extends Scene_Component
                          box: new Cube(),
                          sphere2: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
                          sphere3: new (Subdivision_Sphere)(3),
-                         sphere4: new (Subdivision_Sphere)(4)
+                         sphere4: new (Subdivision_Sphere)(4),
+                         torus: new Torus(15,15),
                        }
 
         //shapes.box.texture_coords = shapes.box.texture_coords.map(v => Vec.of(v[0], v[1]));
@@ -52,6 +55,23 @@ class Assignment_Three_Scene extends Scene_Component
                       texture: context.get_instance("./assets/grass3.png", false),
                   }
               ),
+            //KIA:
+            log:   context.get_instance(Phong_Shader).material(
+                Color.of(0,0,0,1),
+                {
+                    ambient: 1,
+                    texture: context.get_instance("./assets/wood.jpg", false),
+                }
+            ),//END
+
+            //KIA:
+            ring:   context.get_instance(Phong_Shader).material(
+                Color.of(255/255,215/255,0,1),
+                {
+                    ambient: 1,
+                    texture: context.get_instance("./assets/ring.jpg", false),
+                }
+            ),//END
 
             boundary: context.get_instance(Phong_Shader).material(
                   Color.of(0,0,0,1),
@@ -113,6 +133,7 @@ class Assignment_Three_Scene extends Scene_Component
         alert("GAME OVER\nYou survived for: " + t.toFixed(2) + " seconds!");
         document.location.reload();
     }
+
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
       let grey = Color.of(169/255,169/255,169/255, 1);
       const t = graphics_state.animation_time / 1000;
@@ -123,15 +144,15 @@ class Assignment_Three_Scene extends Scene_Component
           for(let j = 1; j !== row_length + 1; j++){
 
               this.shapes.box.draw( graphics_state, model_transform, this.materials.path);
-            
-           
-            if( i > 7 && ( j % 6 === 3 ) && (i % 10 === 0 || i % 10 === 7 || i%10 === 5) ){
+
+            if( i > 7 && ( j % 6 === 3 ) && (/*i % 10 === 0 ||*/ i % 10 === 7 || i%10 === 5) ){
                  model_transform = model_transform.times(Mat4.translation([cur,1.5,0]));
-                 if(i%10 === 5){
+                 if(i%10 === 5){ 
                      model_transform = model_transform.times(Mat4.translation([2,0,0]));
                  }
-             
-                 
+                
+                //this.shapes.torus.draw(graphics_state,model_transform, this.materials.ring);
+                
                  //player shrub collision 
                 if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 6)){
                       this.game_over(t);
@@ -144,13 +165,65 @@ class Assignment_Three_Scene extends Scene_Component
 //                     this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub);
 //                 }
                   cur = -1 * cur;
+                 
                   model_transform = model_transform.times(Mat4.translation([cur,-1.5,0]));
+
                   if(i%10 === 5){
                      model_transform = model_transform.times(Mat4.translation([-2,0,0]));
                   }
-                  
+
             }
-            
+           
+
+           //code to spawn rings
+
+           if( i > 7 && ( j % 6 === 3 ))
+           {
+               //ring spawn 1
+               if (i % 10 === 0 || i % 10 == 1 || i % 10 == 2)
+               {
+                    model_transform = model_transform.times(Mat4.translation([1.5, 1.5, 0]));
+                    model_transform = model_transform.times(Mat4.scale([.05, .05, .05]));
+                    model_transform = model_transform.times(Mat4.rotation(t, Vec.of(0,1,0)));
+
+                    if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
+                    {
+                      ring_count = ring_count + 1;
+                      alert("ring grabbed!");
+                    }
+                
+                    if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
+                    {
+                    this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
+                    }
+                    
+                    model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
+                    model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
+                    model_transform = model_transform.times(Mat4.translation([-1.5, -1.5, 0]));
+                }
+           
+               //ring spawn 2
+               if(i % 10 === 3 || i % 10 == 4 || i % 10 == 5)
+               {
+                    model_transform = model_transform.times(Mat4.translation([-1.5, 1.5, 0]));
+                    model_transform = model_transform.times(Mat4.scale([.05, .05, .05]));
+                    model_transform = model_transform.times(Mat4.rotation(t, Vec.of(0,1,0)));
+
+                    if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
+                    {
+                      ring_count = ring_count + 1;
+                    }
+                
+                    if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
+                    {
+                        this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
+                    }
+
+                model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
+                model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
+                model_transform = model_transform.times(Mat4.translation([1.5, -1.5, 0]));
+              }
+           }
             
             //create boundary on edges
             if((j ===1 || j === row_length))
@@ -163,7 +236,7 @@ class Assignment_Three_Scene extends Scene_Component
 
           } //for loop for j
            model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]));
-           if(i % 110 === 0 || i % 20 === 0 || i % 45 === 0) //create a pit at cycles of 20, 45, and 100
+           if(i % 110 === 0 || i % 20 === 0 || i % 45 === 0) //create a pit at cycles of 20, 45, and 110
            {
              const pit_start = model_transform[2][3];
              for (let k = 0; k < 3; k++){
@@ -188,7 +261,7 @@ class Assignment_Three_Scene extends Scene_Component
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
         let t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
         const p_t = graphics_state.animation_time;
-
+        
         //define constants
         const box_size = 8;
         const row_length = 6;
@@ -199,7 +272,6 @@ class Assignment_Three_Scene extends Scene_Component
         
         //draw_path
         this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state);
- 
 
         //draw chaser
           const chaser_speed = 17*dt;
