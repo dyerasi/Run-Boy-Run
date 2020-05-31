@@ -1,6 +1,6 @@
 
-window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
-class Assignment_Three_Scene extends Scene_Component
+window.Game_Scene = window.classes.Game_Scene =
+class Game_Scene extends Scene_Component
   { constructor( context, control_box )     // The scene begins by requesting the camera, shapes, and materials it will need.
       { super(   context, control_box );    // First, include a secondary Scene that provides movement controls:
         if( !context.globals.has_controls   )
@@ -81,7 +81,9 @@ class Assignment_Three_Scene extends Scene_Component
         this.chaser_transform = Mat4.identity().times(Mat4.translation([40, 15, -1]));
         this.player_transform = this.chaser_transform.times(Mat4.translation([0, 0, 10])).times(Mat4.translation([0,0,5]));
         this.camera_model_transform = Mat4.identity().times(Mat4.translation([40, 15, -1])).times(Mat4.translation([0,0,9]));
-
+        this.timeElement = document.querySelector("#time");
+        this.timeNode = document.createTextNode("");
+        this.timeElement.appendChild(this.timeNode);
 
       }
 
@@ -113,9 +115,9 @@ class Assignment_Three_Scene extends Scene_Component
         alert("GAME OVER\nYou survived for: " + t.toFixed(2) + " seconds!");
         document.location.reload();
     }
-    draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state){
+    draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state, t){
       let grey = Color.of(169/255,169/255,169/255, 1);
-      const t = graphics_state.animation_time / 1000;
+
       let cur = 2;
 
        //draw path
@@ -189,6 +191,8 @@ class Assignment_Three_Scene extends Scene_Component
         let t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
         const p_t = graphics_state.animation_time;
 
+
+        this.timeNode.nodeValue = t.toFixed(2);
         //define constants
         const box_size = 8;
         const row_length = 6;
@@ -198,7 +202,7 @@ class Assignment_Three_Scene extends Scene_Component
         const tr_right = 2; 
         
         //draw_path
-        this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state);
+        this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state, t);
  
 
         //draw chaser
@@ -283,6 +287,8 @@ class Assignment_Three_Scene extends Scene_Component
 
       }
   }
+
+
 
 class Texture_Rotate extends Phong_Shader {
   fragment_glsl_code() {
