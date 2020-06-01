@@ -19,8 +19,9 @@ class Game_Scene extends Scene_Component
         this.jump_end = 0;
         this.right_end = 0;
         this.left_end = 0;
+        this.main_ring_count = 0;
         this.ring_count = 0;
-
+       // this.start_i = 1;
         //player movement constraints
         this.player_left_limit = 21;
         this.player_right_limit = 61;
@@ -70,7 +71,7 @@ class Game_Scene extends Scene_Component
                 Color.of(255/255,215/255,0,1),
                 {
                     ambient: 1,
-                    texture: context.get_instance("./assets/ring.jpg", false),
+                    //texture: context.get_instance("./assets/ring.jpg", false),
                 }
             ),//END
 
@@ -118,7 +119,10 @@ class Game_Scene extends Scene_Component
         this.key_triggered_button( "Left",     [ "a" ], () => this.left_bool = 1, undefined, () => this.left_bool = 0 );
         this.key_triggered_button( "Right",     [ "d" ], () => this.right_bool = 1, undefined, () => this.right_bool = 0 );
       }
-
+    bool_draw(i){
+            return true;
+          //  return this.player_transform[2][3] + 100 >= 14+(i*8) && 14+(i*8) >= this.player_transform[2][3] - 100;
+    }
 
     collision_detected(x_coord, y_coord, z_coord, obstacle_x, obstacle_y, obstacle_z, obstacle_width){
                  if(x_coord-obstacle_width < obstacle_x && x_coord+obstacle_width > obstacle_x ){
@@ -134,41 +138,45 @@ class Game_Scene extends Scene_Component
                  }
                  return false;
     }
-    
     game_over(t){
         alert("GAME OVER\nYou survived for: " + t.toFixed(2) + " seconds!");
         document.location.reload();
     }
     draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state, t){
       let grey = Color.of(169/255,169/255,169/255, 1);
-
+      let c = 18;
       let cur = 2;
 
        //draw path
         for(let i = 1; i !== path_length+1; i++){
+            if(this.player_transform[2][3] + 390 >= 14+(i*c)){
           for(let j = 1; j !== row_length + 1; j++){
 
-              this.shapes.box.draw( graphics_state, model_transform, this.materials.path);
+                //NEED TO ADD CODE TO STOP DRAWING PATH AFTER PLAYER HAS PASSED IT While mantaining model_transform
 
-            if( i > 7 && ( j % 6 === 3 ) && (/*i % 10 === 0 ||*/ i % 10 === 7 || i%10 === 5) ){
+
+
+
+              this.shapes.box.draw( graphics_state, model_transform, this.materials.path); 
+
+
+            if( i > 7 && ( j % 6 === 3 ) && (i % 10 === 1 || i % 10 === 7 || i%10 === 5) ){
                  model_transform = model_transform.times(Mat4.translation([cur,1.5,0]));
                  if(i%10 === 5){ 
                      model_transform = model_transform.times(Mat4.translation([2,0,0]));
                  }
-                
-                //this.shapes.torus.draw(graphics_state,model_transform, this.materials.ring);
+
                 
                  //player shrub collision 
                 if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 6)){
                       this.game_over(t);
                 }
                 //chaser scrub collision
-                if(!((this.chaser_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==32 || model_transform[0][3]==48))){
-                    this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub);
+                if(!(this.chaser_transform[2][3] >= model_transform[2][3] -9  && ((model_transform[0][3] >= 47 && model_transform[0][3] <= 48.2) || (model_transform[0][3] >= 31 && model_transform[0][3] <= 32.3 )))){
+          
+                    this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub); 
                 }
-//                 if(!this.collision_detected(this.chaser_transform[0][3], this.chaser_transform[1][3], this.chaser_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 16)){
-//                     this.shapes.sphere2.draw( graphics_state, model_transform, this.materials.shrub);
-//                 }
+
                   cur = -1 * cur;
                  
                   model_transform = model_transform.times(Mat4.translation([cur,-1.5,0]));
@@ -185,63 +193,56 @@ class Game_Scene extends Scene_Component
            if( i > 7 && ( j % 6 === 3 ))
            {
                //ring spawn 1
+               let x = 0;
                if (i % 10 === 0 || i % 10 == 1 || i % 10 == 2)
                {
-                    model_transform = model_transform.times(Mat4.translation([1.5, 1.5, 0]));
-                    model_transform = model_transform.times(Mat4.scale([.05, .05, .05]));
-                    model_transform = model_transform.times(Mat4.rotation(t, Vec.of(0,1,0)));
-
-                    if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
-                    {
-                      this.ring_count = this.ring_count + 1;
-                      this.scoreNode.nodeValue = this.ring_count;
-                      //alert("ring grabbed!");
-                    }
-                
-                    if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
-                    {
-                    this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
-                    }
-                    
-                    model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
-                    model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
-                    model_transform = model_transform.times(Mat4.translation([-1.5, -1.5, 0]));
-                }
-           
+                   x = 1;
+               }
                //ring spawn 2
                if(i % 10 === 3 || i % 10 == 4 || i % 10 == 5)
                {
-                    model_transform = model_transform.times(Mat4.translation([-1.5, 1.5, 0]));
-                    model_transform = model_transform.times(Mat4.scale([.05, .05, .05]));
-                    model_transform = model_transform.times(Mat4.rotation(t, Vec.of(0,1,0)));
+                   x = -1;
+               }
+               model_transform = model_transform.times(Mat4.translation([x*1.5, 1.5, 0]));
+               model_transform = model_transform.times(Mat4.scale([.05, .05, .05]));
+               model_transform = model_transform.times(Mat4.rotation(t, Vec.of(0,1,0)));
 
-                    if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 1))
-                    {
-                      this.ring_count = this.ring_count + 1;
-                      this.scoreNode.nodeValue = this.ring_count;
-                    }
-                
-                    if(!((this.player_transform[2][3] >= model_transform[2][3] - 4) && (model_transform[0][3]==6 || model_transform[0][3]==9)))
-                    {
+               let px = this.player_transform[0][3];
+               let mx = model_transform[0][3];
+               if( !( (this.player_transform[2][3] >= model_transform[2][3] - 4) && Math.abs(px-mx) <= 2))
+              {
+                  if(this.player_transform[2][3] <= model_transform[2][3] -8 || Math.abs(px-mx) >= 2){
                         this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
-                    }
-
-                model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
-                model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
-                model_transform = model_transform.times(Mat4.translation([1.5, -1.5, 0]));
+                  }
               }
+              else if(this.jump_end == 0){
+                  console.log("ring");
+                 this.main_ring_count = this.main_ring_count + 1;
+              }
+              else{
+                  this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
+              }
+             
+              model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
+              model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
+              model_transform = model_transform.times(Mat4.translation([-1*x*1.5, -1.5, 0]));
+
            }
             
             //create boundary on edges
             if((j ===1 || j === row_length))
             {
               model_transform = model_transform.times(Mat4.translation([0, tr_right, 0]));
+
               this.shapes.box.draw( graphics_state, model_transform, this.materials.boundary);
+
               model_transform = model_transform.times(Mat4.translation([0, -tr_right, 0]));
             }
             model_transform = model_transform.times(Mat4.translation([ tr_right,0, 0]));
 
           } //for loop for j
+          }
+
            model_transform = model_transform.times(Mat4.translation([tr_right * -1 * row_length, 0, 0]));
            if(i % 110 === 0 || i % 20 === 0 || i % 45 === 0) //create a pit at cycles of 20, 45, and 110
            {
@@ -271,16 +272,21 @@ class Game_Scene extends Scene_Component
 
 
         this.timeNode.nodeValue = t.toFixed(2);
-        this.scoreNode.nodeValue = this.ring_count;
+        this.scoreNode.nodeValue = this.main_ring_count;
+
+        //this.main_ring_count = this.ring_count;
+
         //define constants
         const box_size = 8;
         const row_length = 6;
-        const path_length = 100;
+        const path_length = 500;
 
         let model_transform = Mat4.identity().times(Mat4.scale([box_size, box_size, box_size]));
         const tr_right = 2; 
         
         //draw_path
+       // this.start_i = this.start_i + t/8000;
+        //console.log(this.start_i);
         this.draw_path(box_size, row_length, path_length, model_transform, tr_right, graphics_state, t);
  
 
@@ -318,7 +324,7 @@ class Game_Scene extends Scene_Component
 
           //move left
           else if(this.left_bool && !(this.left_end > t)  && this.player_left_limit < this.player_transform[0][3]){
-            this.left_end = t + movement_time;
+            this.left_end = t + movement_time - 0.4;
           //  console.log("Left");
             this.left_bool = 0;
             this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
@@ -326,14 +332,14 @@ class Game_Scene extends Scene_Component
           }
 
           else if(this.left_end > t){
-            this.player_transform = this.player_transform.times(Mat4.translation([-1.1*((this.left_end-t)/movement_time), 0, 0]));
+            this.player_transform = this.player_transform.times(Mat4.translation([-1.2*((this.left_end-t)/movement_time), 0, 0]));
             this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
             this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
 
           //move right
           else if(this.right_bool && !(this.right_end > t) && this.player_right_limit > this.player_transform[0][3]){
-              this.right_end = t + movement_time;
+              this.right_end = t + movement_time - 0.4;
              // console.log("Right");
               this.right_bool = 0;
               this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
@@ -341,7 +347,7 @@ class Game_Scene extends Scene_Component
           }
 
           else if(this.right_end > t){
-              this.player_transform = this.player_transform.times(Mat4.translation([1.1*((this.right_end-t)/movement_time), 0, 0]));
+              this.player_transform = this.player_transform.times(Mat4.translation([1.2*((this.right_end-t)/movement_time), 0, 0]));
               this.player_transform = this.player_transform.times(Mat4.translation([0,0,player_speed]));
               this.shapes.box.draw(graphics_state, this.player_transform.times(Mat4.scale([1,3,1])), this.materials.player);
           }
