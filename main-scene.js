@@ -149,8 +149,8 @@ class Game_Scene extends Scene_Component
 
        //draw path
         for(let i = 1; i !== path_length+1; i++){
+            if(this.player_transform[2][3] + 390 >= 14+(i*c)){
           for(let j = 1; j !== row_length + 1; j++){
-               if(this.player_transform[2][3] + 390 >= 14+(i*c)){
 
                 //NEED TO ADD CODE TO STOP DRAWING PATH AFTER PLAYER HAS PASSED IT While mantaining model_transform
 
@@ -209,15 +209,19 @@ class Game_Scene extends Scene_Component
 
                let px = this.player_transform[0][3];
                let mx = model_transform[0][3];
-               if( !( (this.player_transform[2][3] >= model_transform[2][3] - 9) && Math.abs(px-mx) <= 1))
+               if( !( (this.player_transform[2][3] >= model_transform[2][3] - 4) && Math.abs(px-mx) <= 2))
               {
+                  if(this.player_transform[2][3] <= model_transform[2][3] -8 || Math.abs(px-mx) >= 2){
                         this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
+                  }
               }
               else if(this.jump_end == 0){
                   console.log("ring");
                  this.main_ring_count = this.main_ring_count + 1;
               }
-                 
+              else{
+                  this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
+              }
              
               model_transform = model_transform.times(Mat4.rotation(-t, Vec.of(0,1,0)));
               model_transform = model_transform.times(Mat4.scale([1/.05, 1/.05, 1/.05]));
