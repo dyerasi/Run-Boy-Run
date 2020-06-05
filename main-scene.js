@@ -215,10 +215,9 @@ class Game_Scene extends Scene_Component
                         this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
                   }
               }
-              else if(this.jump_end == 0){
-                  console.log("ring");
-                 this.main_ring_count = this.main_ring_count + 1;
-              }
+               if(this.collision_detected(this.player_transform[0][3], this.player_transform[1][3], this.player_transform[2][3], model_transform[0][3], model_transform[1][3], model_transform[2][3], 6)){
+                   this.main_ring_count = this.main_ring_count + 0.1;
+               }
               else{
                   this.shapes.torus.draw( graphics_state, model_transform, this.materials.ring);
               }
@@ -272,7 +271,9 @@ class Game_Scene extends Scene_Component
 
 
         this.timeNode.nodeValue = t.toFixed(2);
-        this.scoreNode.nodeValue = this.main_ring_count;
+        let temp = parseInt(this.main_ring_count) / 2;
+        let temp2 = parseInt(temp.toString());
+        this.scoreNode.nodeValue = temp2.toString();
 
         //this.main_ring_count = this.ring_count;
 
