@@ -23,8 +23,7 @@ score. We hope that you enjoy playing this game as much as we enjoyed making it!
     Restart Game   - <1> key
 
 ### Link to Gameplay
-    [test](http://localhost:8000/)
-    Link: [Click Here for Video Gameplay](https://drive.google.com/file/d/1CgsxyqLhWsPUgnpmVx01kNIvaAqDZ37F/view?usp=sharing)
+    https://drive.google.com/file/d/1CgsxyqLhWsPUgnpmVx01kNIvaAqDZ37F/view?usp=sharing
     
     
 ### Citations 
