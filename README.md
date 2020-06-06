@@ -8,7 +8,8 @@ with any obstacles. There are also coins on the path that the player can collect
 score. We hope that you enjoy playing this game as much as we enjoyed making it! :)
 
 ### Running the Program 
-    Use host.command for Mac and host.bat for Windows
+    Download this git repository to your local computer
+    Start host.command for Mac and host.bat for Windows
         OR
     If you are using an IDE like Webstorm, simply click on the Chrome icon in the
     index.html file to render the program
