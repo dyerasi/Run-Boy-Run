@@ -24,7 +24,7 @@ score. We hope that you enjoy playing this game as much as we enjoyed making it!
 
 ### Link to Gameplay
     [test](http://localhost:8000/)
-    [Click Here for Video Gameplay](https://drive.google.com/file/d/1CgsxyqLhWsPUgnpmVx01kNIvaAqDZ37F/view?usp=sharing)
+    Link: [Click Here for Video Gameplay](https://drive.google.com/file/d/1CgsxyqLhWsPUgnpmVx01kNIvaAqDZ37F/view?usp=sharing)
     
     
 ### Citations 
