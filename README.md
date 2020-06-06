@@ -22,8 +22,9 @@ score. We hope that you enjoy playing this game as much as we enjoyed making it!
     Jump Movement  - Space Bar
     Restart Game   - <1> key
 
-
-
+### Link to Gameplay
+    [Click Here for Video Gameplay](https://drive.google.com/file/d/1CgsxyqLhWsPUgnpmVx01kNIvaAqDZ37F/view?usp=sharing)
+    
 ### Citations 
     Text Overlay : https://webglfundamentals.org/webgl/lessons/webgl-text-html.html
     
