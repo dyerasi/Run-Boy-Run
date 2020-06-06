@@ -10,6 +10,7 @@ score. We hope that you enjoy playing this game as much as we enjoyed making it!
 ### Running the Program 
     Download this git repository to your local computer
     Start host.command for Mac and host.bat for Windows
+    Navigate to your local host on your preferred browser(Most likely http://localhost:8000/)
         OR
     If you are using an IDE like Webstorm, simply click on the Chrome icon in the
     index.html file to render the program
