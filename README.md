@@ -4,7 +4,7 @@
 
 Run Boy Run is our version of an endless runner game inspired by Temple Run. 
 The objective of the game is to stay as long as possible in the game without colliding 
-with any obstacles. There also coins on the path that the player can collect to increase their
+with any obstacles. There are also coins on the path that the player can collect to increase their
 score. We hope that you enjoy playing this game as much as we enjoyed making it! :)
 
 ### Running the Program 
