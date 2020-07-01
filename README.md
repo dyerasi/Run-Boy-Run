@@ -3,6 +3,8 @@
 ## WebGl Temple Run: Run Boy Run
 
 Run Boy Run is our version of an endless runner game inspired by Temple Run. 
+It was created to familiarize ourselves with a standard rendering pipeline.
+We rely on WebGL 2.0 for our interactive graphics.
 The objective of the game is to stay as long as possible in the game without colliding 
 with any obstacles. There are also coins on the path that the player can collect to increase their
 score. We hope that you enjoy playing this game as much as we enjoyed making it! :)
